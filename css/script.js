@@ -21,3 +21,48 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
   });
 });
+document.querySelector('form').addEventListener('submit', async (event) => {
+  event.preventDefault(); // ページの再読み込みを防止
+
+  // フォームデータを取得
+  const formData = new FormData(event.target);
+  const data = Object.fromEntries(formData.entries());
+
+  try {
+    const response = await fetch('/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      alert('お問い合わせが送信されました。ありがとうございます！');
+      event.target.reset(); // フォームをリセット
+    } else {
+      alert('エラーが発生しました。もう一度お試しください。');
+    }
+  } catch (error) {
+    console.error('エラー:', error);
+    alert('通信に失敗しました。ネットワークを確認してください。');
+  }
+});
+// server.js
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+app.post('/contact', (req, res) => {
+  const { name, email, message } = req.body;
+
+  // データのバリデーションや送信処理をここで行う
+  console.log(`Name: ${name}, Email: ${email}, Message: ${message}`);
+
+  // 成功時のレスポンス
+  res.status(200).send({ message: 'お問い合わせを受け付けました' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
